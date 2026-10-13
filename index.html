@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>镇江·扬州 4天3晚 · 双城秋味</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5efe3; --paper-2:#efe5d0; --paper-3:#e9dcc0;
+  --ink:#2f2b24; --ink-2:#6d6452; --ink-3:#988d74;
+  --persimmon:#b5432a; --persimmon-deep:#8f3220; --persimmon-soft:#e8c9bd;
+  --teal:#33534d; --teal-soft:#d9e2dd;
+  --gold:#c0913a; --gold-soft:#ecd9ae;
+  --line:#d9cbab; --card:#fbf7ee;
+  --shadow:0 2px 10px rgba(63,50,28,.08), 0 12px 32px rgba(63,50,28,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  background-image:
+    radial-gradient(1200px 500px at 85% -5%, rgba(192,145,58,.10), transparent 60%),
+    radial-gradient(900px 420px at -10% 30%, rgba(51,83,77,.07), transparent 60%);
+  color:var(--ink);
+  font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+a{color:var(--persimmon)}
+/* ---------- Hero ---------- */
+.hero{position:relative;overflow:hidden;border-bottom:3px double var(--line);padding:56px 0 40px}
+.hero::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;
+  background:linear-gradient(90deg,var(--persimmon) 0 33%,var(--gold) 33% 66%,var(--teal) 66%)}
+.hero .sun{position:absolute;right:-70px;top:-70px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #d9896a, var(--persimmon) 70%);opacity:.14;filter:blur(2px)}
+.hero .poem{position:absolute;right:26px;top:52px;writing-mode:vertical-rl;letter-spacing:.35em;
+  color:var(--ink-3);font-size:15px;display:none;user-select:none}
+.hero .poem b{color:var(--teal);font-weight:600}
+.kicker{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.3em;color:var(--teal);font-weight:600}
+.kicker::before{content:"";width:26px;height:1px;background:var(--teal)}
+.hero h1{font-family:'Ma Shan Zheng','KaiTi','STKaiti',serif;font-weight:400;
+  font-size:clamp(44px,10vw,76px);line-height:1.15;margin:14px 0 6px;color:var(--ink)}
+.hero h1 em{font-style:normal;color:var(--persimmon)}
+.hero .sub{color:var(--ink-2);font-size:16px;max-width:34em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font-size:13px;padding:4px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink-2)}
+.chip.hot{background:var(--persimmon);border-color:var(--persimmon);color:#fff}
+.chip.teal{background:var(--teal);border-color:var(--teal);color:#fff}
+/* ---------- sections ---------- */
+section{padding:44px 0 8px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+.sec-head .no{font-family:'Ma Shan Zheng','KaiTi',serif;font-size:30px;color:var(--persimmon);line-height:1}
+.sec-head h2{font-size:24px;font-weight:900;letter-spacing:.08em}
+.sec-head .en{font-size:12px;letter-spacing:.25em;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.sec-head::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent);align-self:center;margin-left:0}
+/* checklist */
+.pretrip-todo{list-style:none;display:grid;gap:8px}
+.todo-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-left:4px solid var(--persimmon);border-radius:8px;padding:10px 14px;font-size:15px;box-shadow:var(--shadow)}
+.todo-item input{width:18px;height:18px;accent-color:var(--persimmon);flex:none}
+.todo-deadline{font-size:12px;color:#fff;background:var(--teal);border-radius:4px;padding:1px 8px;flex:none;letter-spacing:.05em}
+.todo-text{color:var(--ink)}
+/* preTrip info */
+.info-grid{display:grid;gap:12px}
+.info-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.info-card h3{font-size:16px;color:var(--teal);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.info-card p{font-size:14.5px;color:var(--ink-2)}
+.info-card .warn{color:var(--persimmon-deep)}
+/* trains */
+.train-list{display:grid;gap:12px}
+.train{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.train .route{font-size:17px;font-weight:900;grid-column:1/-1}
+.train .tag{grid-column:1;font-size:12px;color:var(--persimmon-deep);border:1px solid var(--persimmon-soft);
+  background:#fdf3ef;border-radius:4px;padding:1px 8px;height:fit-content;white-space:nowrap;letter-spacing:.05em}
+.train .note{font-size:14px;color:var(--ink-2);grid-column:2}
+.train .dur{font-size:13px;color:var(--gold);font-weight:600}
+/* hotels */
+.area{margin-bottom:26px}
+.area-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.area-head h3{font-size:18px;font-weight:900}
+.area-head .nights{font-size:12px;background:var(--teal);color:#fff;border-radius:4px;padding:1px 8px;letter-spacing:.1em}
+.area-head .reason{font-size:13.5px;color:var(--ink-3);width:100%}
+.hotel-grid{display:grid;gap:12px}
+.hotel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.hotel .tier{display:inline-block;font-size:11px;letter-spacing:.2em;padding:1px 9px;border-radius:4px;margin-bottom:6px}
+.tier.econ{background:var(--teal-soft);color:var(--teal)}
+.tier.mid{background:var(--gold-soft);color:#7c5a1d}
+.tier.lux{background:var(--persimmon-soft);color:var(--persimmon-deep)}
+.hotel h4{font-size:16px}
+.hotel .price{font-size:14px;color:var(--persimmon);font-weight:600;margin:2px 0}
+.hotel p{font-size:13.5px;color:var(--ink-2)}
+/* disclaimer */
+.disclaimer{margin:34px 0 6px;background:#f3e3da;border:1px dashed var(--persimmon);border-radius:12px;padding:16px 18px;
+  font-size:13.5px;color:var(--persimmon-deep)}
+.disclaimer b{letter-spacing:.15em}
+/* map */
+#map{height:430px;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--paper-2);z-index:1}
+.map-note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+.route-pin{background:var(--persimmon);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center}
+.route-pin__num{color:#fff;font-weight:700;font-size:13px;font-family:Georgia,serif}
+.leaflet-popup-content{font-family:inherit;font-size:13px}
+/* days */
+.day{margin-bottom:38px}
+.day-head{background:linear-gradient(135deg,var(--teal),#27403b);color:#fff;border-radius:14px;padding:16px 20px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.day-head::after{content:attr(data-d);position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  font-family:'Ma Shan Zheng','KaiTi',serif;font-size:52px;opacity:.16;line-height:1}
+.day-head .dmeta{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.day-head .dnum{font-family:'Ma Shan Zheng','KaiTi',serif;font-size:26px;color:var(--gold-soft)}
+.day-head .ddate{font-size:14px;letter-spacing:.1em;color:#cfdcd7}
+.day-head h3{font-size:19px;font-weight:900;margin-top:2px}
+.day-tips{margin:12px 0 18px;display:grid;gap:6px}
+.day-tips li{list-style:none;font-size:13.5px;color:var(--ink-2);padding-left:18px;position:relative}
+.day-tips li::before{content:"❝";position:absolute;left:0;color:var(--gold)}
+.timeline{position:relative;padding-left:34px}
+.timeline::before{content:"";position:absolute;left:12px;top:8px;bottom:8px;width:2px;
+  background:repeating-linear-gradient(180deg,var(--line) 0 8px,transparent 8px 14px)}
+.slot{position:relative;margin-bottom:20px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow)}
+.slot .pin{position:absolute;left:-34px;top:16px;width:26px;height:26px;border-radius:50%;background:var(--persimmon);
+  border:2px solid var(--paper);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:Georgia,serif;font-weight:700;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.25);z-index:2}
+.slot-media{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,var(--teal) 0%,#4a6d64 55%,var(--gold) 130%)}
+.slot-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.slot-media .glyph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Ma Shan Zheng','KaiTi',serif;font-size:64px;color:rgba(255,255,255,.85);text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.slot-media .period{position:absolute;left:0;top:0;background:rgba(47,43,36,.72);color:#f3e9d2;font-size:12px;
+  letter-spacing:.25em;padding:3px 12px 3px 14px;border-radius:0 0 10px 0}
+.slot-body{padding:14px 18px 16px}
+.slot-body h4{font-size:18px;font-weight:900;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.slot-body .time{font-size:13px;color:var(--gold);font-weight:600;letter-spacing:.03em}
+.slot-body .review{font-size:14.5px;color:var(--ink-2);margin:6px 0 4px}
+.meta{display:grid;gap:4px;margin-top:8px;font-size:13px;color:var(--ink-2)}
+.meta div{display:flex;gap:8px}
+.meta .k{flex:none;color:var(--teal);font-weight:600;letter-spacing:.1em;font-size:12px;padding-top:1px}
+.reminder-badge{display:inline-block;background:var(--persimmon);color:#fff;font-size:12px;border-radius:4px;
+  padding:1px 8px;letter-spacing:.05em}
+/* alternatives */
+.alts{display:grid;gap:10px;margin:14px 0 4px;padding:14px;background:var(--paper-2);
+  border:1px dashed var(--gold);border-radius:12px}
+.alts h5{font-size:13px;letter-spacing:.2em;color:#7c5a1d;margin-bottom:2px}
+.alt{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px}
+.alt b{color:var(--persimmon)}
+.alt span{color:var(--ink-2);font-size:13.5px}
+/* dining */
+.dining{margin:16px 0 0;padding:16px 18px;background:var(--teal-soft);border:1px solid #c3d2cc;border-radius:12px}
+.dining h4{font-size:15px;color:var(--teal);letter-spacing:.15em;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.meal{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.meal:last-child{margin-bottom:0}
+.meal .m{font-size:12px;color:#fff;background:var(--gold);border-radius:4px;padding:1px 8px;margin-right:8px;letter-spacing:.15em}
+.meal .place{font-size:16px;font-weight:900}
+.meal .hours{font-size:12.5px;color:var(--ink-3);margin-left:8px}
+.dishes{margin-top:6px;display:grid;gap:2px}
+.dishes .d{display:flex;justify-content:space-between;gap:16px;font-size:14px;border-bottom:1px dotted var(--line);padding:2px 0}
+.dishes .d span:last-child{color:var(--persimmon);white-space:nowrap;font-size:13px}
+/* tips */
+.tips{display:grid;gap:8px}
+.tips li{list-style:none;background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:10px 14px 10px 40px;position:relative;font-size:14.5px;color:var(--ink-2);box-shadow:var(--shadow)}
+.tips li::before{content:"※";position:absolute;left:16px;color:var(--persimmon)}
+footer{margin-top:44px;border-top:3px double var(--line);padding:26px 0 46px;text-align:center}
+footer .seal{display:inline-block;font-family:'Ma Shan Zheng','KaiTi',serif;color:#fff;background:var(--persimmon);
+  border-radius:6px;padding:4px 10px;font-size:18px;letter-spacing:.1em;margin-bottom:10px}
+footer p{font-size:12.5px;color:var(--ink-3)}
+/* ---------- desktop ---------- */
+@media (min-width:768px){
+  .wrap{max-width:940px;padding:0 32px}
+  .hero{padding:76px 0 56px}
+  .hero .poem{display:block}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .train-list{grid-template-columns:1fr 1fr}
+  .hotel-grid{grid-template-columns:repeat(3,1fr)}
+  #map{height:520px}
+  .day .slots-col{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+  .timeline{padding-left:40px}
+  .alts{grid-column:1/-1}
+  .dining{grid-column:1/-1}
+  .tips{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="sun"></div>
+  <div class="poem">京口瓜洲一水间<b>·</b>钟山只隔数重山</div>
+  <div class="wrap">
+    <span class="kicker">淮北 ✕ 昆山 · 双城汇合之旅</span>
+    <h1>镇江<em>·</em>扬州</h1>
+    <p class="sub">大闸蟹与早茶的正季，沿长江慢慢走：西津渡的千年渡口、金山寺的传说、冶春的蟹黄汤包、瘦西湖的秋水。四天三晚，一半给镇江，一半给扬州。</p>
+    <div class="chips">
+      <span class="chip hot">2026.10.29 周四 — 11.01 周日</span>
+      <span class="chip">4 天 3 晚</span>
+      <span class="chip teal">🦀 蟹季 · 九雌十雄</span>
+      <span class="chip">早茶 ×2 · 园林 ×4 · 江山 ×3</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="todo">
+    <div class="sec-head"><span class="no">壹</span><h2>出发前待办</h2><span class="en">CHECKLIST</span></div>
+    <div id="checklist"><noscript>启用 JavaScript 以查看按出发日期计算的待办清单</noscript></div>
+  </section>
+
+  <section id="pretrip">
+    <div class="sec-head"><span class="no">贰</span><h2>行前须知</h2><span class="en">BEFORE YOU GO</span></div>
+    <div class="info-grid" id="info-grid"></div>
+  </section>
+
+  <section id="transport">
+    <div class="sec-head"><span class="no">叁</span><h2>城际交通 · 高铁候选</h2><span class="en">RAIL</span></div>
+    <div class="train-list" id="train-list"></div>
+    <div class="disclaimer" id="disclaimer-box">
+      <b>免责声明</b>｜本页全部信息（天气、车次、酒店、餐厅、景点、门票、价格、营业时间、评分、活动等）均为 AI 基于公开资料整理的参考建议，可能不准确或已过时，不保证与实时情况一致；请务必在官方渠道（12306、订票订房平台、景区公众号、地图 App）核实后再做决定或前往。
+    </div>
+  </section>
+
+  <section id="hotels">
+    <div class="sec-head"><span class="no">肆</span><h2>住宿 · 片区与价位</h2><span class="en">STAY</span></div>
+    <div id="hotel-areas"></div>
+  </section>
+
+  <section id="map-sec">
+    <div class="sec-head"><span class="no">伍</span><h2>全程地图</h2><span class="en">MAP</span></div>
+    <div id="map"></div>
+    <p class="map-note">编号与下方时间轴一致，点击标记可导航；地图瓦片与图片需联网加载，离线时文字行程照常可读。老城街区部分坐标为估算（已标注），以实地为准。</p>
+  </section>
+
+  <section id="days">
+    <div class="sec-head"><span class="no">陆</span><h2>逐日行程</h2><span class="en">ITINERARY</span></div>
+    <div id="day-list"></div>
+  </section>
+
+  <section id="tips">
+    <div class="sec-head"><span class="no">柒</span><h2>全程贴士</h2><span class="en">TIPS</span></div>
+    <ul class="tips" id="tips-list"></ul>
+  </section>
+
+  <footer>
+    <span class="seal">淮扬秋味</span>
+    <p>把这份 HTML 丢回对话里说一句，即可在原结构上改行程（如「第三天的何园挪到第四天」）。<br>
+    本页全部信息为 AI 静态整理的参考，可能过时，请以官方渠道为准。</p>
+  </footer>
+
+</main>
+
+<script id="trip-data" type="application/json">
+{
+  "title": "镇江·扬州 4天3晚 · 双城秋味",
+  "startDate": "2026-10-29",
+  "colorScheme": "宣纸米白 × 柿红 × 黛青（淮扬秋色）",
+  "preTrip": {
+    "weather": {
+      "summary": "10月底–11月初的镇江/扬州：以晴到多云为主，白天约16–20°C，夜间8–12°C，昼夜温差大；偶有冷空气带来大风降温或一场秋雨。",
+      "typhoon": "深秋已无台风风险，但冷空气过境时江面与北固山、长江边体感明显更冷，注意防风；出发前看3天预报，随身备伞。"
+    },
+    "packing": "洋葱式穿搭：长袖T恤/薄毛衣 + 风衣或夹克；两城老街都是石板路，日均1.5–2万步，务必软底舒适鞋；秋高气爽紫外线不弱，墨镜有用。",
+    "payment": "移动支付全程通行无碍；景区预约与购票基本都在微信小程序完成（镇江博物馆公众号、扬州景区官方号），出发前先关注好；备少量现金应对老街小摊。",
+    "apps": ["12306（购票/候补/改签）", "高德或百度地图（打车+步行导航）", "微信（景区预约小程序）", "大众点评（早茶排队参考）"],
+    "ticketTip": "12306 现行预售期约15天，10-29 的票约 10-15 开售——淮北方向班次少，开售即买；扬州园林联票出行前在官方公众号确认在售再买。"
+  },
+  "flights": {
+    "booked": [],
+    "candidates": [
+      { "label": "淮北 → 镇江南（去程·淮北方）", "code": "经徐州东中转", "time": "全程约2.5小时", "note": "淮北直达镇江南的班次有限，先查直达；无合适班次则「淮北→徐州东（约30分钟）+ 徐州东→镇江南（约1.5小时）」，徐州东班次密集，中转从容。" },
+      { "label": "昆山南 → 镇江南（去程·昆山方）", "code": "京沪高铁直达", "time": "约1.5小时", "note": "班次密集，二等座约¥90（参考）。两边约定同班次前后脚到，约11:30在镇江南站出站口汇合。" },
+      { "label": "镇江站 → 扬州东（D2过江）", "code": "连镇高铁", "time": "约17分钟", "note": "二等座约¥24，每日40+班基本随到随走。注意是市区的「镇江站」，不是京沪高铁的「镇江南站」。" },
+      { "label": "扬州东 → 昆山南（返程·昆山方）", "code": "直达 G7461 / D5665 / G7587 / G8273", "time": "约1.5–2小时", "note": "直达班次少且集中在上午（示例：G7461 07:58发、D5665 08:09、G7587 09:15、G8273 11:32）。下午返程可经南京南中转，或改乘到「昆山站」的班次（更多），以12306当日为准。" },
+      { "label": "扬州东 → 淮北（返程·淮北方）", "code": "经镇江 / 南京南中转", "time": "全程约3–3.5小时", "note": "扬州东→镇江站约20分钟，出站打车约20分钟至镇江南站，转京沪高铁北上；或全程在南京南中转。" }
+    ]
+  },
+  "hotelAreas": [
+    {
+      "area": "镇江 · 西津渡 / 大市口片区",
+      "reason": "住1晚（D1）。步行逛西津渡夜街，打车10分钟到金山寺与宴春早市，次日去镇江站过江顺路。",
+      "options": [
+        { "tier": "经济", "name": "宜必思酒店（大市口店）", "priceRange": "约¥150–300/晚", "note": "大市口商圈，近宴春酒楼与邵顺兴，打车约10分钟到西津渡。" },
+        { "tier": "中档", "name": "全季酒店（西津渡店）", "priceRange": "约¥400–600/晚", "note": "步行可达西津渡古街；同价位还有西津渡·金山寺风景区亚朵酒店。" },
+        { "tier": "高端", "name": "镇江苏宁万豪酒店", "priceRange": "约¥700+/晚", "note": "大市口苏宁广场旁，镇江市区标准最高的国际品牌。" }
+      ]
+    },
+    {
+      "area": "扬州 · 东关街 / 个园历史街区",
+      "reason": "住2晚（D2–D3）。早茶、个园、东关街全在步行圈，古运河夜游码头就在街东头——扬州就该住进老城里。",
+      "options": [
+        { "tier": "经济", "name": "汉庭酒店（东关街店）", "priceRange": "约¥250–350/晚", "note": "东关街商圈内，出门就是历史街区。" },
+        { "tier": "中档", "name": "花筑·扬州个园客栈", "priceRange": "约¥400–700/晚", "note": "东关街上紧邻个园；预算上探可选长乐客栈（古宅庭院式，约¥800–1300）。" },
+        { "tier": "高端", "name": "扬州迎宾馆", "priceRange": "约¥1000+/晚", "note": "瘦西湖畔五星国宾馆，园内趣园茶社的早茶有名；打车到东关街约10分钟。" }
+      ]
+    }
+  ],
+  "disclaimer": "本页全部信息（天气、车次、酒店、餐厅、景点、门票、价格、营业时间、评分、活动等）均为 AI 基于公开资料整理的参考建议，可能不准确或已过时，不保证与实时情况一致；请务必在官方渠道（12306、订票订房平台、景区公众号、地图App）核实后再做决定或前往。",
+  "tips": [
+    "12306 预售期约15天：10-29 的票约 10-15 开售，淮北方向班次少，开售即买；买不到就候补或买徐州东/南京南中转。",
+    "早茶要赶早：冶春周六最挤，7:00前到稳；花园茶楼是本地人路线，8点后反而松。",
+    "大闸蟹「九雌十雄」：本行程正处雌蟹黄浓、雄蟹膏起的交接期，清蒸点一雌一雄对比着吃最划算。",
+    "两城老街全是石板路+步行日，软底鞋决定幸福感；日均1.5–2万步。",
+    "扬州三把刀（厨刀、理发刀、修脚刀）：晚上安排一次修脚或足浴，配早茶是完整体验。",
+    "园林联票（瘦西湖+个园+何园+大明寺，约¥180–220）比单买省，但需出行前在官方公众号确认在售。",
+    "秋日长江日落约17:20：D1傍晚的西津渡待渡亭、云台阁，是全程最出片的暮色时刻。"
+  ],
+  "reminders": [
+    { "item": "去程高铁：淮北→镇江方向（直达或徐州东中转）", "leadDays": 15 },
+    { "item": "去程高铁：昆山南→镇江南", "leadDays": 15 },
+    { "item": "返程高铁：扬州东返程（昆山方向直达班次少，开售即买）", "leadDays": 15 },
+    { "item": "扬州周六晚酒店（东关街片区周末房态偏紧）", "leadDays": 14 },
+    { "item": "镇江博物馆免费预约（微信公众号）", "leadDays": 3 },
+    { "item": "古运河夜游船票（周末场次）", "leadDays": 2 },
+    { "item": "瘦西湖等园林门票或联票（官方小程序）", "leadDays": 3 }
+  ],
+  "days": [
+    {
+      "date": "2026-10-29", "weekday": "周四", "theme": "镇江 · 千年渡口的黄昏",
+      "tips": ["镇江博物馆周一闭馆，今天不受影响；免费入场，建议提前公众号预约。", "行李寄存酒店前台，轻装逛西津渡。"],
+      "slots": [
+        {
+          "period": "morning", "name": "镇江南站 · 双城汇合", "time": "约11:30 前后",
+          "lat": 32.15435, "lng": 119.4186,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Platform%20of%20Zhenjiang%20South%20Railway%20Station%2020260523.jpg?width=640",
+          "review": "京沪高铁镇江南站出站口汇合，打车约20分钟到西津渡；两边车程都在3小时以内，是这次选镇江做第一站的原因。",
+          "transport": { "mode": "高铁 + 出租车", "fare": "打车约¥20", "duration": "淮北方经徐州东全程约2.5小时；昆山南直达约1.5小时" }
+        },
+        {
+          "period": "noon", "name": "西津渡古街 & 镇江博物馆", "time": "13:30–15:30",
+          "lat": 32.2166, "lng": 119.4256,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E8%A5%BF%E6%B4%A5%E6%B8%A1%E5%8E%86%E5%8F%B2%E6%96%87%E5%8C%96%E8%A1%97%E5%8C%BA%20-%20Xijin%20Ferry%20Historic%20Area%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "openingHours": "古街全天；博物馆9:00–17:00（周一闭馆）",
+          "ticketPrice": "古街免费；博物馆免费（公众号预约）；英国领事馆旧址约¥20",
+          "review": "「一眼看千年」：唐宋以来的渡口街巷层层叠叠，昭关石塔、救生会、五十三坡都在一条街上，慢慢晃正好一下午。",
+          "seasonal": "秋日长江日落早，约17:20",
+          "transport": { "mode": "出租车", "fare": "约¥20", "duration": "约20分钟" },
+          "needsBooking": true, "leadDays": 3
+        },
+        {
+          "period": "evening", "name": "西津渡夜色 · 云台阁", "time": "17:00–20:00",
+          "lat": 32.218, "lng": 119.4262,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Zhaoguan-stonetower.jpg?width=640",
+          "openingHours": "街区全天（亮灯约17:30后）",
+          "ticketPrice": "夜游街区免费（云台阁登楼以现场为准）",
+          "review": "坐标为估算。待渡亭看长江暮色，华灯初上的石塔与老街比白天更出片；晚饭后回街里再走一遍夜路。"
+        }
+      ],
+      "dining": [
+        { "meal": "午餐", "place": "周家二小姐的菜（西津渡店）", "hours": "约10:30–21:00", "dishes": [ { "name": "镇江私房菜·时令菜（以当日菜单为准）", "price": "人均约¥80–120（参考）" } ] },
+        { "meal": "晚餐", "place": "美华小馆 · 镇江菜（西津渡店）", "hours": "约至21:00", "dishes": [ { "name": "水晶肴肉、白汁鮰鱼等镇江味", "price": "人均约¥60–90（参考）" } ] }
+      ]
+    },
+    {
+      "date": "2026-10-30", "weekday": "周五", "theme": "镇江 · 山寺怀古 → 过江 · 初到扬州",
+      "tips": ["上午玩完回酒店取行李再打车去镇江站，动线最省力。", "连镇高铁在市区「镇江站」发车，别去错「镇江南站」。"],
+      "alternatives": [
+        { "label": "方案A 北固山（默认）", "summary": "1.5小时轻松怀古：甘露寺、北固楼揽长江，山不高但浓度极高。" },
+        { "label": "方案B 焦山碑林", "summary": "《瘗鹤铭》「大字之祖」，轮渡上岛，门票约¥65含船，需2.5小时——爱书法再换它。" }
+      ],
+      "slots": [
+        {
+          "period": "morning", "name": "金山寺", "time": "08:45–10:45",
+          "lat": 32.2175, "lng": 119.4109,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Zhenjiang%20Jinshan.jpg?width=640",
+          "openingHours": "旺季8:00–17:00",
+          "ticketPrice": "旺季约¥65（参考）",
+          "review": "白娘子水漫金山的地方。「金山寺裹山」——寺把整座山包在里面，慈寿塔登顶看长江与镇江城。",
+          "transport": { "mode": "出租车", "fare": "约¥15", "duration": "约15分钟" }
+        },
+        {
+          "period": "noon", "name": "北固山 · 甘露寺", "time": "11:15–12:45",
+          "lat": 32.22, "lng": 119.46,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E5%8C%97%E5%9B%BA%E5%B1%B1%20-%20Beigu%20Mountain%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "openingHours": "约8:00–17:30",
+          "ticketPrice": "旺季约¥40；三山联票约¥150（参考）",
+          "review": "「何处望神州，满眼风光北固楼」——辛弃疾怀古处，刘备招亲的甘露寺，多景楼是看长江的最佳机位。",
+          "transport": { "mode": "出租车", "fare": "约¥20", "duration": "约15分钟" }
+        },
+        {
+          "period": "evening", "name": "东关街 · 黄昏", "time": "16:00–17:30",
+          "lat": 32.404, "lng": 119.44,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E4%B8%9C%E5%85%B3%E8%A1%97%20-%20Dongguan%20Street%20of%20Yangzhou%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "openingHours": "全天",
+          "ticketPrice": "免费",
+          "review": "坐标为估算。千年商街的黄昏：青石板、老字号、灯笼次第亮起，先踩点再吃饭。",
+          "transport": { "mode": "连镇高铁 + 出租车", "fare": "高铁约¥24；打车约¥25–30", "duration": "高铁约17分钟 + 打车约20–25分钟" }
+        },
+        {
+          "period": "evening", "name": "古运河夜游（东关古渡）", "time": "19:30–20:30",
+          "lat": 32.4008, "lng": 119.4475,
+          "openingHours": "东关古渡码头14:30–20:30约半点发船",
+          "ticketPrice": "约¥80–100（参考）",
+          "review": "坐标为估算。乘画舫看古运河两岸灯光——扬州是运河原点城市，夜景比白天有味道。",
+          "needsBooking": true, "leadDays": 2
+        }
+      ],
+      "dining": [
+        { "meal": "早餐", "place": "宴春酒楼（大市口总店 · 早市）", "hours": "早市6:30–14:00（早市最受推崇）", "dishes": [ { "name": "水晶肴蹄", "price": "约¥30/份（参考）" }, { "name": "蟹黄汤包", "price": "时价，约¥20+/只" }, { "name": "白汤大面", "price": "约¥20（参考）" } ] },
+        { "meal": "午餐", "place": "邵顺兴锅盖面（大市口总店）", "hours": "早市为主、下午早打烊（电话 0511-85022240 确认）", "dishes": [ { "name": "锅盖面（跳面）", "price": "约¥15–25（参考）" }, { "name": "水晶肴肉蘸香醋姜丝", "price": "约¥20（参考）" } ] },
+        { "meal": "晚餐", "place": "扬州狮子楼（文昌商圈店）", "hours": "约11:00–21:00", "dishes": [ { "name": "清炖蟹粉狮子头", "price": "约¥30–60/只（参考）" }, { "name": "大煮干丝", "price": "约¥40（参考）" }, { "name": "清蒸大闸蟹", "price": "时价" } ] }
+      ]
+    },
+    {
+      "date": "2026-10-31", "weekday": "周六", "theme": "扬州 · 早茶与园林的正日子",
+      "tips": ["周六早茶人最多：冶春御码头店7:00前到，先取号再逛河边。", "瘦西湖从南门进、北门出，出来就是大明寺，动线最顺。", "中午在园内歇脚吃简餐，晚上再正餐。"],
+      "slots": [
+        {
+          "period": "morning", "name": "个园", "time": "08:45–10:30",
+          "lat": 32.40201, "lng": 119.43815,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E4%B8%AA%E5%9B%AD.jpg?width=640",
+          "openingHours": "约7:15–17:30",
+          "ticketPrice": "旺季约¥45；园林联票约¥180–220（官方渠道确认）",
+          "review": "盐商第一园：用竹石把春夏秋冬造进四组假山，一圈走完一年四季；就在东关街北端。",
+          "transport": { "mode": "步行", "fare": "免费", "duration": "从冶春御码头约15分钟" }
+        },
+        {
+          "period": "noon", "name": "瘦西湖", "time": "11:00–14:30",
+          "lat": 32.41, "lng": 119.4175,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E7%98%A6%E8%A5%BF%E6%B9%96%20-%20%E4%BA%94%E4%BA%AD%E6%A1%A5%E3%80%81%E7%99%BD%E5%A1%94%20-%20panoramio.jpg?width=640",
+          "openingHours": "约7:30–17:30",
+          "ticketPrice": "旺季约¥100（参考）",
+          "review": "扬州的名片：长堤春柳—徐园—小金山—五亭桥—二十四桥—熙春台，一条水路走到北门。秋季水杉渐染、残荷听雨，别有味道。",
+          "seasonal": "秋色初染（银杏满金要到11月中）",
+          "transport": { "mode": "出租车", "fare": "约¥15", "duration": "约10分钟" }
+        },
+        {
+          "period": "noon", "name": "大明寺 · 平山堂", "time": "14:45–16:45",
+          "lat": 32.42167, "lng": 119.40833,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E5%A4%A7%E6%98%8E%E5%AF%BA%E6%A0%96%E7%81%B5%E5%A1%94%20%28Qiling%20Pagoda%20in%20Daming%20Temple%29%20-%20panoramio.jpg?width=640",
+          "openingHours": "约8:00–17:00",
+          "ticketPrice": "旺季约¥45（栖灵塔登塔另收）",
+          "review": "欧阳修、苏轼留下平山堂的地方，鉴真东渡的出发地；登栖灵塔俯瞰瘦西湖全景，是这趟最值的视角。",
+          "transport": { "mode": "步行", "fare": "免费", "duration": "瘦西湖北门出约10分钟" }
+        },
+        {
+          "period": "evening", "name": "彩衣街 · 东关街夜市", "time": "17:30–21:00",
+          "lat": 32.3975, "lng": 119.4415,
+          "openingHours": "全天（夜市入夜最热闹）",
+          "ticketPrice": "免费",
+          "review": "坐标为估算。老城的夜：小吃摊、酱菜铺、灯影里的市井气。吃完可加一场修脚或足浴（扬州三把刀之修脚刀）。"
+        }
+      ],
+      "dining": [
+        { "meal": "早餐", "place": "冶春茶社（御码头店）", "hours": "约6:00起，高峰7:00/8:00/9:00三波", "dishes": [ { "name": "蟹黄汤包", "price": "时价" }, { "name": "烫干丝", "price": "约¥30（参考）" }, { "name": "五丁包", "price": "约¥10（参考）" } ] },
+        { "meal": "晚餐", "place": "彩衣街 · 东关街小吃夜巡", "hours": "入夜最热闹", "dishes": [ { "name": "盐水鹅（老鹅摊）", "price": "约¥30–50/份（参考）" }, { "name": "赤豆元宵", "price": "约¥10（参考）" }, { "name": "黄桥烧饼 / 蟹壳黄", "price": "约¥5–10/只（参考）" } ] }
+      ]
+    },
+    {
+      "date": "2026-11-01", "weekday": "周日", "theme": "扬州 · 收尾与返程",
+      "tips": ["昆山方向直达车次多在上午：若想早回，可放弃下午安排改乘上午直达（见交通区候选班次）。", "伴手礼：谢馥春鸭蛋粉、三和四美酱菜、真空盐水鹅。"],
+      "slots": [
+        {
+          "period": "morning", "name": "何园", "time": "09:30–11:00",
+          "lat": 32.38819, "lng": 119.44332,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E4%BD%95%E5%9B%AD%E8%88%B9%E5%8E%852019.jpg?width=640",
+          "openingHours": "约7:30–17:30",
+          "ticketPrice": "旺季约¥45（参考）",
+          "review": "「晚清第一园」：复道回廊是中国最早的立体交通，1500米廊道绕园一周；片石山房传为石涛叠山遗作。",
+          "transport": { "mode": "出租车", "fare": "约¥10–15", "duration": "约10分钟" }
+        },
+        {
+          "period": "noon", "name": "皮市街", "time": "11:15–12:45",
+          "lat": 32.394, "lng": 119.436,
+          "openingHours": "全天",
+          "ticketPrice": "免费",
+          "review": "坐标为估算。本地年轻人的文艺街区：独立书店、咖啡馆、杂货铺，逛吃收尾最舒服。",
+          "transport": { "mode": "出租车 / 步行", "fare": "约¥10", "duration": "打车约5分钟" }
+        },
+        {
+          "period": "evening", "name": "扬州东站 · 返程", "time": "15:00–16:00 发车（以车次为准）",
+          "lat": 32.40708, "lng": 119.522674,
+          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Yangzhoudong%20Railway%20Station%20Facade.jpg?width=640",
+          "review": "回酒店取行李后打车约20–25分钟到扬州东。昆山方向直达班次多在上午，下午返程走南京南/镇江中转或选到「昆山站」的车次。",
+          "transport": { "mode": "出租车", "fare": "约¥25–30", "duration": "约20–25分钟" }
+        }
+      ],
+      "dining": [
+        { "meal": "早餐", "place": "花园茶楼（本地人平价早茶）", "hours": "约5:30–13:00", "dishes": [ { "name": "蟹黄汤包 / 蒸饺 / 烫干丝", "price": "人均约¥20–40（参考）" } ] },
+        { "meal": "午餐", "place": "共和春（甘泉路老字号）", "hours": "早市起全天营业", "dishes": [ { "name": "虾籽饺面", "price": "约¥15–20（参考）" }, { "name": "锅贴", "price": "约¥10–15（参考）" } ] }
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+// Leaflet 地图引擎。纯函数（buildNavLink/buildMapAppLinks/routeCoordinates/gcj02ToWgs84）可单元测试；
+// initTravelMap 需浏览器 + Leaflet (L)。浏览器与 Node 双用。
+
+// HTML 转义，防止 XSS
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// 生成跳转手机地图导航的链接。
+// iOS 不识别 geo: scheme，用 Apple Maps 的 https 通用链接；其余平台用 geo:。
+// ua 可选（浏览器里传 navigator.userAgent），不传则回退 geo:。
+function buildNavLink(lat, lng, label, ua) {
+  if (ua && /iPhone|iPad|iPod/.test(ua)) {
+    return 'https://maps.apple.com/?ll=' + lat + ',' + lng + '&q=' + encodeURIComponent(label);
+  }
+  return 'geo:' + lat + ',' + lng + '?q=' + lat + ',' + lng + '(' + encodeURIComponent(label) + ')';
+}
+
+// 常用地图 App 的点位链接（免 key 的官方 URI 规范：高德 URI API、Google Maps URLs）。
+// 这不是 page-contract 的 actionLink——不承载实时数据主张，只是"打开地图看这个点"。
+// 境内点只给高德（Google 地图境内不可用、底图坐标系还会偏移）；境外点给 Google + 高德。
+// 输入坐标一律 WGS-84：高德 URI 用 coordinate=wgs84 声明由其换算，Google 本身即 WGS-84。
+// isInChinaBBox 声明在下方 GCJ 区块（函数声明有提升，此处可用）。
+function buildMapAppLinks(lat, lng, label) {
+  var amap = {
+    label: '高德地图',
+    url: 'https://uri.amap.com/marker?position=' + lng + ',' + lat
+      + '&name=' + encodeURIComponent(label)
+      + '&coordinate=wgs84&callnative=1&src=travel-plan-viz',
+  };
+  var google = {
+    label: 'Google 地图',
+    url: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat + ',' + lng),
+  };
+  return isInChinaBBox(lat, lng) ? [amap] : [google, amap];
+}
+
+// —— GCJ-02 → WGS-84 坐标转换 ——
+// 高德/腾讯地图返回的坐标是 GCJ-02（国测局加密），直接画在 OSM（WGS-84）瓦片上
+// 会偏移一百到几百米。凡坐标来自高德/腾讯类 skill，必须先经此函数转换。
+// 中国境外坐标原样返回（GCJ-02 仅在境内加偏）。
+var GCJ_A = 6378245.0;
+var GCJ_EE = 0.00669342162296594323;
+
+function isInChinaBBox(lat, lng) {
+  return lng >= 72.004 && lng <= 137.8347 && lat >= 0.8293 && lat <= 55.8271;
+}
+
+function gcjTransformLat(x, y) {
+  var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(y * Math.PI) + 40.0 * Math.sin(y / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (160.0 * Math.sin(y / 12.0 * Math.PI) + 320.0 * Math.sin(y * Math.PI / 30.0)) * 2.0 / 3.0;
+  return ret;
+}
+
+function gcjTransformLng(x, y) {
+  var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(x * Math.PI) + 40.0 * Math.sin(x / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (150.0 * Math.sin(x / 12.0 * Math.PI) + 300.0 * Math.sin(x / 30.0 * Math.PI)) * 2.0 / 3.0;
+  return ret;
+}
+
+function gcj02ToWgs84(lat, lng) {
+  if (!isInChinaBBox(lat, lng)) return { lat: lat, lng: lng };
+  var dLat = gcjTransformLat(lng - 105.0, lat - 35.0);
+  var dLng = gcjTransformLng(lng - 105.0, lat - 35.0);
+  var radLat = lat / 180.0 * Math.PI;
+  var magic = Math.sin(radLat);
+  magic = 1 - GCJ_EE * magic * magic;
+  var sqrtMagic = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((GCJ_A * (1 - GCJ_EE)) / (magic * sqrtMagic) * Math.PI);
+  dLng = (dLng * 180.0) / (GCJ_A / sqrtMagic * Math.cos(radLat) * Math.PI);
+  return { lat: lat - dLat, lng: lng - dLng };
+}
+
+// 从有序点位提取 [lat,lng] 数组，用于连线
+function routeCoordinates(points) {
+  return points.map(function (p) { return [p.lat, p.lng]; });
+}
+
+// 初始化地图：编号 divIcon 标记、按序虚线路线、点击弹出 名称+时间+导航链接。
+// elementId: 容器 id；points: [{lat, lng, name, time}]（按行程顺序，坐标须为 WGS-84）
+// opts 可选：{ tileUrl, attribution } 替换默认 OSM 瓦片源（如 OSM 访问不稳时换镜像）。
+function initTravelMap(elementId, points, opts) {
+  opts = opts || {};
+  var map = L.map(elementId);
+  L.tileLayer(opts.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: opts.attribution || '© OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(map);
+
+  var ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+  points.forEach(function (p, i) {
+    var icon = L.divIcon({
+      className: 'route-pin',
+      html: '<span class="route-pin__num">' + (i + 1) + '</span>',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    });
+    var navLinks = [{ label: '导航', url: buildNavLink(p.lat, p.lng, p.name, ua) }]
+      .concat(buildMapAppLinks(p.lat, p.lng, p.name));
+    L.marker([p.lat, p.lng], { icon: icon }).addTo(map).bindPopup(
+      '<b>' + (i + 1) + '. ' + escapeHTML(p.name) + '</b><br>'
+      + (p.time ? escapeHTML(p.time) + '<br>' : '')
+      + navLinks.map(function (l) {
+          return '<a href="' + l.url + '">' + escapeHTML(l.label) + '</a>';
+        }).join(' · ')
+    );
+  });
+
+  var coords = routeCoordinates(points);
+  if (coords.length > 1) {
+    L.polyline(coords, { dashArray: '6 8', weight: 2 }).addTo(map);
+  }
+  map.fitBounds(coords.length ? coords : [[0, 0]], { padding: [30, 30] });
+  return map;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    buildNavLink: buildNavLink,
+    buildMapAppLinks: buildMapAppLinks,
+    routeCoordinates: routeCoordinates,
+    gcj02ToWgs84: gcj02ToWgs84,
+    initTravelMap: initTravelMap,
+  };
+}
+</script>
+<script>
+// 出发前提醒：截止日期计算 + 渲染。浏览器与 Node 双用。
+
+// startDateISO: 'YYYY-MM-DD'；items: [{item, leadDays}]
+// 返回按 deadline 升序的 [{item, leadDays, deadline}]，deadline 为 'YYYY-MM-DD'
+// 用 UTC 做日期运算，避免本地时区导致的偏移。
+function computeReminders(startDateISO, items) {
+  return items
+    .map(function (it) {
+      var d = new Date(startDateISO + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() - it.leadDays);
+      return { item: it.item, leadDays: it.leadDays, deadline: d.toISOString().slice(0, 10) };
+    })
+    .sort(function (a, b) {
+      return a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0;
+    });
+}
+
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderChecklistHTML(reminders) {
+  var lis = reminders.map(function (r) {
+    return '<li class="todo-item">'
+      + '<input type="checkbox"> '
+      + '<span class="todo-deadline">' + r.deadline + '前</span> '
+      + '<span class="todo-text">' + escapeHTML(r.item) + '（建议提前' + r.leadDays + '天）</span>'
+      + '</li>';
+  }).join('');
+  return '<ul class="pretrip-todo">' + lis + '</ul>';
+}
+
+function reminderBadgeHTML(leadDays) {
+  return '<span class="reminder-badge">⚠️ 建议提前' + leadDays + '天订</span>';
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    computeReminders: computeReminders,
+    renderChecklistHTML: renderChecklistHTML,
+    reminderBadgeHTML: reminderBadgeHTML,
+  };
+}
+</script>
+<script>
+(function () {
+  var trip = JSON.parse(document.getElementById('trip-data').textContent);
+  var PERIOD = { morning: '上午', noon: '午后', evening: '晚上' };
+
+  function h(html) { return html; }
+
+  /* 1. 页顶待办 */
+  document.getElementById('checklist').innerHTML =
+    renderChecklistHTML(computeReminders(trip.startDate, trip.reminders));
+
+  /* 2. 行前须知 */
+  var pt = trip.preTrip;
+  document.getElementById('info-grid').innerHTML = [
+    '<div class="info-card"><h3>🌤 天气与季节</h3><p>' + escapeHTML(pt.weather.summary) + '</p><p class="warn">' + escapeHTML(pt.weather.typhoon) + '</p></div>',
+    '<div class="info-card"><h3>🧅 穿搭</h3><p>' + escapeHTML(pt.packing) + '</p></div>',
+    '<div class="info-card"><h3>💳 支付</h3><p>' + escapeHTML(pt.payment) + '</p></div>',
+    '<div class="info-card"><h3>📱 必备 App</h3><p>' + pt.apps.map(escapeHTML).join(' · ') + '</p><p class="warn">🎫 ' + escapeHTML(pt.ticketTip) + '</p></div>'
+  ].join('');
+
+  /* 3. 交通（高铁候选） */
+  document.getElementById('train-list').innerHTML = trip.flights.candidates.map(function (c) {
+    return '<div class="train"><div class="route">' + escapeHTML(c.label) + '</div>'
+      + '<div class="tag">' + escapeHTML(c.code) + '</div>'
+      + '<div class="note"><span class="dur">⏱ ' + escapeHTML(c.time) + '</span><br>' + escapeHTML(c.note)
+      + '<br><span style="color:var(--ink-3);font-size:12px">待选 · 请在 12306 核实与购票</span></div></div>';
+  }).join('');
+
+  /* 4. 酒店 */
+  document.getElementById('hotel-areas').innerHTML = trip.hotelAreas.map(function (a) {
+    var tierCls = { '经济': 'econ', '中档': 'mid', '高端': 'lux' };
+    return '<div class="area"><div class="area-head"><h3>' + escapeHTML(a.area) + '</h3>'
+      + '<span class="nights">' + (a.area.indexOf('镇江') === 0 ? 'D1 · 1晚' : 'D2–D3 · 2晚') + '</span>'
+      + '<span class="reason">' + escapeHTML(a.reason) + '</span></div>'
+      + '<div class="hotel-grid">' + a.options.map(function (o) {
+        return '<div class="hotel"><span class="tier ' + (tierCls[o.tier] || 'econ') + '">' + escapeHTML(o.tier) + '</span>'
+          + '<h4>' + escapeHTML(o.name) + '</h4><div class="price">' + escapeHTML(o.priceRange) + '</div>'
+          + '<p>' + escapeHTML(o.note) + '</p></div>';
+      }).join('') + '</div></div>';
+  }).join('');
+
+  /* 5+6. 逐日行程（含地图点位收集） */
+  var points = [], slotNo = 0;
+  var dayHtml = trip.days.map(function (day, di) {
+    var slotsHtml = day.slots.map(function (s) {
+      slotNo++;
+      points.push({ lat: s.lat, lng: s.lng, name: s.name, time: 'D' + (di + 1) + ' ' + (s.time || '') });
+      var media = '<div class="slot-media"><span class="period">' + (PERIOD[s.period] || '') + '</span>'
+        + (s.photo
+          ? '<img src="' + escapeHTML(s.photo) + '" alt="' + escapeHTML(s.name) + '" loading="lazy" onerror="this.style.display=\'none\'">'
+          : '<span class="glyph">' + escapeHTML(s.name.replace(/[^\u4e00-\u9fa5]/g, '').charAt(0) || '行') + '</span>')
+        + '</div>';
+      var meta = '';
+      if (s.openingHours) meta += '<div><span class="k">时间</span><span>' + escapeHTML(s.openingHours) + '</span></div>';
+      if (s.ticketPrice) meta += '<div><span class="k">门票</span><span>' + escapeHTML(s.ticketPrice) + '</span></div>';
+      if (s.transport) meta += '<div><span class="k">交通</span><span>' + escapeHTML(s.transport.mode) + ' · ' + escapeHTML(s.transport.duration) + (s.transport.fare ? ' · ' + escapeHTML(s.transport.fare) : '') + '</span></div>';
+      if (s.seasonal) meta += '<div><span class="k">时令</span><span>🍂 ' + escapeHTML(s.seasonal) + '</span></div>';
+      return '<article class="slot"><span class="pin">' + slotNo + '</span>' + media
+        + '<div class="slot-body"><h4>' + escapeHTML(s.name) + (s.needsBooking ? ' ' + reminderBadgeHTML(s.leadDays) : '') + '</h4>'
+        + '<div class="time">🕐 ' + escapeHTML(s.time || '') + '</div>'
+        + '<p class="review">' + escapeHTML(s.review || '') + '</p>'
+        + (meta ? '<div class="meta">' + meta + '</div>' : '')
+        + '</div></article>';
+    }).join('');
+    var tipsHtml = (day.tips || []).length
+      ? '<ul class="day-tips">' + day.tips.map(function (t) { return '<li>' + escapeHTML(t) + '</li>'; }).join('') + '</ul>'
+      : '';
+    var altsHtml = '';
+    if (day.alternatives && day.alternatives.length) {
+      altsHtml = '<div class="alts"><h5>当日二选一</h5>' + day.alternatives.map(function (a) {
+        return '<div class="alt"><b>' + escapeHTML(a.label) + '</b>　<span>' + escapeHTML(a.summary) + '</span></div>';
+      }).join('') + '</div>';
+    }
+    var diningHtml = (day.dining || []).length
+      ? '<div class="dining"><h4>🍜 当日餐饮</h4>' + day.dining.map(function (m) {
+        return '<div class="meal"><span class="m">' + escapeHTML(m.meal) + '</span><span class="place">' + escapeHTML(m.place) + '</span>'
+          + (m.hours ? '<span class="hours">' + escapeHTML(m.hours) + '</span>' : '') + '</div>'
+          + '<div class="dishes">' + (m.dishes || []).map(function (d) {
+            return '<div class="d"><span>' + escapeHTML(d.name) + '</span><span>' + escapeHTML(d.price) + '</span></div>';
+          }).join('') + '</div>';
+      }).join('') + '</div>'
+      : '';
+    return '<div class="day"><div class="day-head" data-d="D' + (di + 1) + '">'
+      + '<div class="dmeta"><span class="dnum">D' + (di + 1) + '</span><span class="ddate">' + escapeHTML(day.date.slice(5).replace('-', '月') + '日 · ' + day.weekday) + '</span></div>'
+      + '<h3>' + escapeHTML(day.theme) + '</h3></div>'
+      + tipsHtml
+      + '<div class="slots-col"><div class="timeline">' + slotsHtml + '</div>' + altsHtml + diningHtml + '</div></div>';
+  }).join('');
+  document.getElementById('day-list').innerHTML = dayHtml;
+
+  /* 7. 全程贴士 */
+  document.getElementById('tips-list').innerHTML = trip.tips.map(function (t) {
+    return '<li>' + escapeHTML(t) + '</li>';
+  }).join('');
+
+  /* 8. 地图 */
+  try {
+    if (typeof L !== 'undefined' && typeof initTravelMap === 'function') {
+      initTravelMap('map', points);
+    } else {
+      document.getElementById('map').innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-3);font-size:14px">地图组件（Leaflet CDN）未能加载——文字行程不受影响</div>';
+    }
+  } catch (e) {
+    document.getElementById('map').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-3);font-size:14px">地图加载失败：' + escapeHTML(String(e.message || e)) + '</div>';
+  }
+})();
+</script>
+</body>
+</html>
