@@ -4,10 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>镇江·扬州 4天3晚 · 双城秋味</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<script>
+(function () {
+  var JS = ['leaflet/leaflet.js'];
+  window.initMapSafe = function () {
+    var m = document.getElementById('map');
+    if (!m || m._done) return; m._done = 1;
+    try { initTravelMap('map', window.__tripPoints || [], window.__tripMapOpts); }
+    catch (e) { window.mapFail(String(e.message || e)); }
+  };
+  window.mapFail = function (msg) {
+    var m = document.getElementById('map');
+    if (!m || m._done) return;
+    m.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-3);font-size:14px;text-align:center;padding:0 20px">地图组件（Leaflet）未能加载——文字行程不受影响' + (msg ? '<br>' + msg : '') + '</div>';
+  };
+  function loadJs(i) {
+    if (i >= JS.length) { window.mapFail(''); return; }
+    var s = document.createElement('script');
+    s.src = JS[i];
+    s.onload = function () {
+      if (typeof L !== 'undefined' && typeof initTravelMap === 'function') window.initMapSafe();
+      else loadJs(i + 1);
+    };
+    s.onerror = function () { loadJs(i + 1); };
+    document.head.appendChild(s);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { loadJs(0); });
+  else loadJs(0);
+})();
+</script>
 <style>
 :root{
   --paper:#f5efe3; --paper-2:#efe5d0; --paper-3:#e9dcc0;
@@ -47,7 +73,7 @@ a{color:var(--persimmon)}
 .hero .poem b{color:var(--teal);font-weight:600}
 .kicker{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.3em;color:var(--teal);font-weight:600}
 .kicker::before{content:"";width:26px;height:1px;background:var(--teal)}
-.hero h1{font-family:'Ma Shan Zheng','KaiTi','STKaiti',serif;font-weight:400;
+.hero h1{font-family:'Ma Shan Zheng','Kaiti SC','KaiTi','STKaiti',serif;font-weight:400;
   font-size:clamp(44px,10vw,76px);line-height:1.15;margin:14px 0 6px;color:var(--ink)}
 .hero h1 em{font-style:normal;color:var(--persimmon)}
 .hero .sub{color:var(--ink-2);font-size:16px;max-width:34em}
@@ -236,7 +262,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
   <section id="map-sec">
     <div class="sec-head"><span class="no">伍</span><h2>全程地图</h2><span class="en">MAP</span></div>
     <div id="map"></div>
-    <p class="map-note">编号与下方时间轴一致，点击标记可导航；地图瓦片与图片需联网加载，离线时文字行程照常可读。老城街区部分坐标为估算（已标注），以实地为准。</p>
+    <p class="map-note">编号与下方时间轴一致，点击标记可导航（底图为高德地图，标注点已做坐标系对齐）；地图瓦片需联网加载，离线时文字行程照常可读。老城街区部分坐标为估算（已标注），以实地为准。</p>
   </section>
 
   <section id="days">
@@ -329,14 +355,14 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "morning", "name": "镇江南站 · 双城汇合", "time": "约11:30 前后",
           "lat": 32.15435, "lng": 119.4186,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Platform%20of%20Zhenjiang%20South%20Railway%20Station%2020260523.jpg?width=640",
+          "photo": "img/zhenjiannan.jpg",
           "review": "京沪高铁镇江南站出站口汇合，打车约20分钟到西津渡；两边车程都在3小时以内，是这次选镇江做第一站的原因。",
           "transport": { "mode": "高铁 + 出租车", "fare": "打车约¥20", "duration": "淮北方经徐州东全程约2.5小时；昆山南直达约1.5小时" }
         },
         {
           "period": "noon", "name": "西津渡古街 & 镇江博物馆", "time": "13:30–15:30",
           "lat": 32.2166, "lng": 119.4256,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E8%A5%BF%E6%B4%A5%E6%B8%A1%E5%8E%86%E5%8F%B2%E6%96%87%E5%8C%96%E8%A1%97%E5%8C%BA%20-%20Xijin%20Ferry%20Historic%20Area%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "photo": "img/xijindu.jpg",
           "openingHours": "古街全天；博物馆9:00–17:00（周一闭馆）",
           "ticketPrice": "古街免费；博物馆免费（公众号预约）；英国领事馆旧址约¥20",
           "review": "「一眼看千年」：唐宋以来的渡口街巷层层叠叠，昭关石塔、救生会、五十三坡都在一条街上，慢慢晃正好一下午。",
@@ -347,7 +373,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "evening", "name": "西津渡夜色 · 云台阁", "time": "17:00–20:00",
           "lat": 32.218, "lng": 119.4262,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Zhaoguan-stonetower.jpg?width=640",
+          "photo": "img/zhaoguan.jpg",
           "openingHours": "街区全天（亮灯约17:30后）",
           "ticketPrice": "夜游街区免费（云台阁登楼以现场为准）",
           "review": "坐标为估算。待渡亭看长江暮色，华灯初上的石塔与老街比白天更出片；晚饭后回街里再走一遍夜路。"
@@ -369,7 +395,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "morning", "name": "金山寺", "time": "08:45–10:45",
           "lat": 32.2175, "lng": 119.4109,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Zhenjiang%20Jinshan.jpg?width=640",
+          "photo": "img/jinshan.jpg",
           "openingHours": "旺季8:00–17:00",
           "ticketPrice": "旺季约¥65（参考）",
           "review": "白娘子水漫金山的地方。「金山寺裹山」——寺把整座山包在里面，慈寿塔登顶看长江与镇江城。",
@@ -378,7 +404,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "noon", "name": "北固山 · 甘露寺", "time": "11:15–12:45",
           "lat": 32.22, "lng": 119.46,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E5%8C%97%E5%9B%BA%E5%B1%B1%20-%20Beigu%20Mountain%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "photo": "img/beigushan.jpg",
           "openingHours": "约8:00–17:30",
           "ticketPrice": "旺季约¥40；三山联票约¥150（参考）",
           "review": "「何处望神州，满眼风光北固楼」——辛弃疾怀古处，刘备招亲的甘露寺，多景楼是看长江的最佳机位。",
@@ -387,7 +413,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "evening", "name": "东关街 · 黄昏", "time": "16:00–17:30",
           "lat": 32.404, "lng": 119.44,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E4%B8%9C%E5%85%B3%E8%A1%97%20-%20Dongguan%20Street%20of%20Yangzhou%20-%202015.04%20-%20panoramio.jpg?width=640",
+          "photo": "img/dongguanjie.jpg",
           "openingHours": "全天",
           "ticketPrice": "免费",
           "review": "坐标为估算。千年商街的黄昏：青石板、老字号、灯笼次第亮起，先踩点再吃饭。",
@@ -415,7 +441,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "morning", "name": "个园", "time": "08:45–10:30",
           "lat": 32.40201, "lng": 119.43815,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E4%B8%AA%E5%9B%AD.jpg?width=640",
+          "photo": "img/geyuan.jpg",
           "openingHours": "约7:15–17:30",
           "ticketPrice": "旺季约¥45；园林联票约¥180–220（官方渠道确认）",
           "review": "盐商第一园：用竹石把春夏秋冬造进四组假山，一圈走完一年四季；就在东关街北端。",
@@ -424,7 +450,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "noon", "name": "瘦西湖", "time": "11:00–14:30",
           "lat": 32.41, "lng": 119.4175,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E7%98%A6%E8%A5%BF%E6%B9%96%20-%20%E4%BA%94%E4%BA%AD%E6%A1%A5%E3%80%81%E7%99%BD%E5%A1%94%20-%20panoramio.jpg?width=640",
+          "photo": "img/shouxihu.jpg",
           "openingHours": "约7:30–17:30",
           "ticketPrice": "旺季约¥100（参考）",
           "review": "扬州的名片：长堤春柳—徐园—小金山—五亭桥—二十四桥—熙春台，一条水路走到北门。秋季水杉渐染、残荷听雨，别有味道。",
@@ -434,7 +460,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "noon", "name": "大明寺 · 平山堂", "time": "14:45–16:45",
           "lat": 32.42167, "lng": 119.40833,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E6%89%AC%E5%B7%9E%E5%A4%A7%E6%98%8E%E5%AF%BA%E6%A0%96%E7%81%B5%E5%A1%94%20%28Qiling%20Pagoda%20in%20Daming%20Temple%29%20-%20panoramio.jpg?width=640",
+          "photo": "img/damingsi.jpg",
           "openingHours": "约8:00–17:00",
           "ticketPrice": "旺季约¥45（栖灵塔登塔另收）",
           "review": "欧阳修、苏轼留下平山堂的地方，鉴真东渡的出发地；登栖灵塔俯瞰瘦西湖全景，是这趟最值的视角。",
@@ -460,7 +486,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "morning", "name": "何园", "time": "09:30–11:00",
           "lat": 32.38819, "lng": 119.44332,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/%E4%BD%95%E5%9B%AD%E8%88%B9%E5%8E%852019.jpg?width=640",
+          "photo": "img/heyuan.jpg",
           "openingHours": "约7:30–17:30",
           "ticketPrice": "旺季约¥45（参考）",
           "review": "「晚清第一园」：复道回廊是中国最早的立体交通，1500米廊道绕园一周；片石山房传为石涛叠山遗作。",
@@ -477,7 +503,7 @@ footer p{font-size:12.5px;color:var(--ink-3)}
         {
           "period": "evening", "name": "扬州东站 · 返程", "time": "15:00–16:00 发车（以车次为准）",
           "lat": 32.40708, "lng": 119.522674,
-          "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/Yangzhoudong%20Railway%20Station%20Facade.jpg?width=640",
+          "photo": "img/yangzhoudong.jpg",
           "review": "回酒店取行李后打车约20–25分钟到扬州东。昆山方向直达班次多在上午，下午返程走南京南/镇江中转或选到「昆山站」的车次。",
           "transport": { "mode": "出租车", "fare": "约¥25–30", "duration": "约20–25分钟" }
         }
@@ -574,6 +600,14 @@ function gcj02ToWgs84(lat, lng) {
   return { lat: lat - dLat, lng: lng - dLng };
 }
 
+// 逆变换（WGS-84 → GCJ-02，近似，误差约1–2米）：底图为高德/腾讯等 GCJ-02 瓦片时，
+// 把 WGS-84 点位转成 GCJ-02 再上图，消除底图与标注的系统性偏移。
+function wgs84ToGcj02(lat, lng) {
+  if (!isInChinaBBox(lat, lng)) return { lat: lat, lng: lng };
+  var g = gcj02ToWgs84(lat, lng);
+  return { lat: lat * 2 - g.lat, lng: lng * 2 - g.lng };
+}
+
 // 从有序点位提取 [lat,lng] 数组，用于连线
 function routeCoordinates(points) {
   return points.map(function (p) { return [p.lat, p.lng]; });
@@ -585,13 +619,21 @@ function routeCoordinates(points) {
 function initTravelMap(elementId, points, opts) {
   opts = opts || {};
   var map = L.map(elementId);
-  L.tileLayer(opts.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  var tileOpts = {
     attribution: opts.attribution || '© OpenStreetMap contributors',
-    maxZoom: 19,
-  }).addTo(map);
+    maxZoom: opts.maxZoom || 19,
+  };
+  if (opts.subdomains) tileOpts.subdomains = opts.subdomains;
+  L.tileLayer(opts.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', tileOpts).addTo(map);
+
+  // displayCrs='gcj02'：底图为 GCJ-02（高德/腾讯瓦片）时，先把 WGS-84 点位转换再上图
+  var toDisp = opts.displayCrs === 'gcj02'
+    ? function (p) { return wgs84ToGcj02(p.lat, p.lng); }
+    : function (p) { return { lat: p.lat, lng: p.lng }; };
 
   var ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
   points.forEach(function (p, i) {
+    var d = toDisp(p);
     var icon = L.divIcon({
       className: 'route-pin',
       html: '<span class="route-pin__num">' + (i + 1) + '</span>',
@@ -600,7 +642,7 @@ function initTravelMap(elementId, points, opts) {
     });
     var navLinks = [{ label: '导航', url: buildNavLink(p.lat, p.lng, p.name, ua) }]
       .concat(buildMapAppLinks(p.lat, p.lng, p.name));
-    L.marker([p.lat, p.lng], { icon: icon }).addTo(map).bindPopup(
+    L.marker([d.lat, d.lng], { icon: icon }).addTo(map).bindPopup(
       '<b>' + (i + 1) + '. ' + escapeHTML(p.name) + '</b><br>'
       + (p.time ? escapeHTML(p.time) + '<br>' : '')
       + navLinks.map(function (l) {
@@ -609,7 +651,7 @@ function initTravelMap(elementId, points, opts) {
     );
   });
 
-  var coords = routeCoordinates(points);
+  var coords = points.map(function (p) { var d = toDisp(p); return [d.lat, d.lng]; });
   if (coords.length > 1) {
     L.polyline(coords, { dashArray: '6 8', weight: 2 }).addTo(map);
   }
@@ -772,18 +814,16 @@ if (typeof module !== 'undefined' && module.exports) {
     return '<li>' + escapeHTML(t) + '</li>';
   }).join('');
 
-  /* 8. 地图 */
-  try {
-    if (typeof L !== 'undefined' && typeof initTravelMap === 'function') {
-      initTravelMap('map', points);
-    } else {
-      document.getElementById('map').innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-3);font-size:14px">地图组件（Leaflet CDN）未能加载——文字行程不受影响</div>';
-    }
-  } catch (e) {
-    document.getElementById('map').innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-3);font-size:14px">地图加载失败：' + escapeHTML(String(e.message || e)) + '</div>';
-  }
+  /* 8. 地图（Leaflet 由页首加载器异步载入，就绪后调用 initMapSafe） */
+  window.__tripPoints = points;
+  window.__tripMapOpts = {
+    tileUrl: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+    subdomains: ['1', '2', '3', '4'],
+    attribution: '© 高德地图底图（GCJ-02，标注点已对齐）',
+    maxZoom: 18,
+    displayCrs: 'gcj02'
+  };
+  if (typeof L !== 'undefined' && typeof initTravelMap === 'function') window.initMapSafe();
 })();
 </script>
 </body>
